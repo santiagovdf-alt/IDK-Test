@@ -43,9 +43,9 @@ const Results = () => {
             </div>
           </div>
 
-          {/* Right Column - Image Gallery */}
+          {/* Right Column - Single Main Image with Gallery */}
           <div>
-            <ImageGallery images={galleryImages} />
+            <ImageGallery images={galleryImages} singleImageMode={true} />
           </div>
         </div>
       </div>
