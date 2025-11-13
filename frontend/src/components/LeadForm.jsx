@@ -51,6 +51,10 @@ const LeadForm = () => {
     setLoading(true);
 
     try {
+      if (!supabase) {
+        throw new Error('Database connection not configured. Please contact support.');
+      }
+
       // Format services_interested with all project details
       const servicesInterested = [
         `Services: ${formData.serviceTypes.join(', ')}`,
