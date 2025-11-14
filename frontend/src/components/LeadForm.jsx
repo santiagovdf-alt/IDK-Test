@@ -51,24 +51,24 @@ const LeadForm = () => {
     setLoading(true);
 
     try {
-      // Format services_interested field to include all relevant information
-      const servicesInterested = [
-        `Services: ${formData.serviceTypes.join(', ')}`,
-        formData.projectType ? `Project Type: ${formData.projectType}` : '',
-        formData.spaceSize ? `Space Size: ${formData.spaceSize}` : '',
-        formData.budget ? `Budget: ${formData.budget}` : '',
-        formData.timeline ? `Timeline: ${formData.timeline}` : '',
-        formData.message ? `Message: ${formData.message}` : ''
-      ].filter(Boolean).join('\n');
+      // Format services_interested field
+      const servicesInterested = formData.serviceTypes.join(', ');
 
-      // Format for Supabase
+      // Convert space_size to integer (remove non-numeric characters and parse)
+      const spaceSizeNum = parseInt(formData.spaceSize.replace(/\D/g, '')) || 100;
+
+      // Format for Supabase - all required fields
       const submitData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         city: formData.city,
         project_type: formData.projectType,
-        services_interested: servicesInterested
+        services_interested: servicesInterested,
+        space_size: spaceSizeNum,
+        budget: formData.budget,
+        timeline: formData.timeline,
+        message: formData.message || ''
       };
 
       const { data, error } = await supabase
