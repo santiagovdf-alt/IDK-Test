@@ -9,10 +9,7 @@ import { Checkbox } from './ui/checkbox';
 import { Send } from 'lucide-react';
 import { mockData } from '../mock';
 import { toast } from 'sonner';
-import axios from 'axios';
-
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
+import { supabase } from '../supabaseClient';
 
 const LeadForm = () => {
   const [formData, setFormData] = useState({
@@ -45,50 +42,59 @@ const LeadForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
-    if (formData.serviceTypes.length === 0) {
-      toast.error("Please select at least one service");
-      return;
-    }
-    
     setLoading(true);
 
     try {
-      // Format for backend
+      // Format services_interested field with safe default
+      const servicesInterested = formData.serviceTypes.length > 0
+        ? formData.serviceTypes.join(', ')
+        : 'Not specified';
+
+      // Convert space_size to integer with safe default
+      const spaceSizeNum = formData.spaceSize
+        ? parseInt(formData.spaceSize.replace(/\D/g, '')) || 0
+        : 0;
+
+      // Format for Supabase - use safe defaults for optional fields
       const submitData = {
         name: formData.name,
-        company: formData.serviceTypes.join(', '),
         email: formData.email,
-        phone: formData.phone,
-        city: formData.city,
-        projectType: formData.projectType,
-        spaceSize: parseInt(formData.spaceSize.replace(/\D/g, '')) || 100,
-        budget: formData.budget,
-        timeline: formData.timeline,
-        message: `Services: ${formData.serviceTypes.join(', ')}\n\n${formData.message}`
+        phone: formData.phone || 'Not provided',
+        city: formData.city || 'Not provided',
+        project_type: formData.projectType || 'Not specified',
+        services_interested: servicesInterested,
+        space_size: spaceSizeNum,
+        budget: formData.budget || 'Not specified',
+        timeline: formData.timeline || 'Not specified',
+        message: formData.message || ''
       };
 
-      const response = await axios.post(`${API}/leads`, submitData);
-      
-      if (response.data.success) {
-        toast.success("Request Submitted!", {
-          description: "We'll contact you within 24 hours to discuss your project.",
-        });
-        
-        // Reset form
-        setFormData({
-          name: '',
-          email: '',
-          phone: '',
-          city: '',
-          serviceTypes: [],
-          projectType: '',
-          spaceSize: '',
-          budget: '',
-          timeline: '',
-          message: ''
-        });
+      const { data, error } = await supabase
+        .from('leads')
+        .insert([submitData])
+        .select();
+
+      if (error) {
+        throw error;
       }
+
+      toast.success("Request Submitted!", {
+        description: "We'll contact you within 24 hours to discuss your project.",
+      });
+
+      // Reset form
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        city: '',
+        serviceTypes: [],
+        projectType: '',
+        spaceSize: '',
+        budget: '',
+        timeline: '',
+        message: ''
+      });
     } catch (error) {
       console.error('Lead submission error:', error);
       toast.error("Submission Failed", {
@@ -142,21 +148,19 @@ const LeadForm = () => {
               {/* Row 2 */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-[#1F2B35] font-medium">Phone Number *</Label>
+                  <Label htmlFor="phone" className="text-[#1F2B35] font-medium">Phone Number (optional)</Label>
                   <Input
                     id="phone"
                     type="tel"
-                    required
                     value={formData.phone}
                     onChange={(e) => handleChange('phone', e.target.value)}
                     className="border-[#D3D6D9] focus:border-[#2E404F]"
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="city" className="text-[#1F2B35] font-medium">City / Location *</Label>
+                  <Label htmlFor="city" className="text-[#1F2B35] font-medium">City / Location (optional)</Label>
                   <Input
                     id="city"
-                    required
                     value={formData.city}
                     onChange={(e) => handleChange('city', e.target.value)}
                     className="border-[#D3D6D9] focus:border-[#2E404F]"
@@ -166,7 +170,7 @@ const LeadForm = () => {
 
               {/* Service Types - Checkboxes */}
               <div className="space-y-3">
-                <Label className="text-[#1F2B35] font-medium">Interested In: *</Label>
+                <Label className="text-[#1F2B35] font-medium">Interested In (optional)</Label>
                 <div className="space-y-3">
                   {mockData.formFields.serviceTypes.map((service) => (
                     <div key={service} className="flex items-center space-x-2">
@@ -189,8 +193,8 @@ const LeadForm = () => {
               {/* Row 3 */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="projectType" className="text-[#1F2B35] font-medium">Project Type *</Label>
-                  <Select value={formData.projectType} onValueChange={(value) => handleChange('projectType', value)} required>
+                  <Label htmlFor="projectType" className="text-[#1F2B35] font-medium">Project Type (optional)</Label>
+                  <Select value={formData.projectType} onValueChange={(value) => handleChange('projectType', value)}>
                     <SelectTrigger className="border-[#D3D6D9] focus:border-[#2E404F]">
                       <SelectValue placeholder="Select type" />
                     </SelectTrigger>
@@ -202,8 +206,8 @@ const LeadForm = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="spaceSize" className="text-[#1F2B35] font-medium">Space Size *</Label>
-                  <Select value={formData.spaceSize} onValueChange={(value) => handleChange('spaceSize', value)} required>
+                  <Label htmlFor="spaceSize" className="text-[#1F2B35] font-medium">Space Size (optional)</Label>
+                  <Select value={formData.spaceSize} onValueChange={(value) => handleChange('spaceSize', value)}>
                     <SelectTrigger className="border-[#D3D6D9] focus:border-[#2E404F]">
                       <SelectValue placeholder="Select size" />
                     </SelectTrigger>
@@ -219,8 +223,8 @@ const LeadForm = () => {
               {/* Row 4 */}
               <div className="grid md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="budget" className="text-[#1F2B35] font-medium">Budget *</Label>
-                  <Select value={formData.budget} onValueChange={(value) => handleChange('budget', value)} required>
+                  <Label htmlFor="budget" className="text-[#1F2B35] font-medium">Budget (optional)</Label>
+                  <Select value={formData.budget} onValueChange={(value) => handleChange('budget', value)}>
                     <SelectTrigger className="border-[#D3D6D9] focus:border-[#2E404F]">
                       <SelectValue placeholder="Select budget" />
                     </SelectTrigger>
@@ -232,8 +236,8 @@ const LeadForm = () => {
                   </Select>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="timeline" className="text-[#1F2B35] font-medium">Timeline *</Label>
-                  <Select value={formData.timeline} onValueChange={(value) => handleChange('timeline', value)} required>
+                  <Label htmlFor="timeline" className="text-[#1F2B35] font-medium">Timeline (optional)</Label>
+                  <Select value={formData.timeline} onValueChange={(value) => handleChange('timeline', value)}>
                     <SelectTrigger className="border-[#D3D6D9] focus:border-[#2E404F]">
                       <SelectValue placeholder="Select timeline" />
                     </SelectTrigger>
