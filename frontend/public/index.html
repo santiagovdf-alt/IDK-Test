@@ -14,11 +14,18 @@
         <!-- Event snippet for Click Request a Consultation conversion page -->
         <script>
         function gtag_report_conversion_consultation(url) {
+          console.log('gtag_report_conversion_consultation called');
+          if (typeof gtag === 'undefined') {
+            console.warn('gtag not loaded yet');
+            return false;
+          }
           var callback = function () {
+            console.log('Consultation conversion callback executed');
             if (typeof(url) != 'undefined') {
               window.location = url;
             }
           };
+          console.log('Sending consultation conversion event to Google Analytics');
           gtag('event', 'conversion', {
               'send_to': 'AW-16968282134/ELttCIam9cEbEJbgjZs_',
               'event_callback': callback
@@ -30,11 +37,18 @@
         <!-- Event snippet for Click Whatsapp conversion page -->
         <script>
         function gtag_report_conversion_whatsapp(url) {
+          console.log('gtag_report_conversion_whatsapp called');
+          if (typeof gtag === 'undefined') {
+            console.warn('gtag not loaded yet');
+            return false;
+          }
           var callback = function () {
+            console.log('WhatsApp conversion callback executed');
             if (typeof(url) != 'undefined') {
               window.location = url;
             }
           };
+          console.log('Sending WhatsApp conversion event to Google Analytics');
           gtag('event', 'conversion', {
               'send_to': 'AW-16968282134/j6U-COms-cEbEJbgjZs_',
               'event_callback': callback

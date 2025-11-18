@@ -25,8 +25,12 @@ function App() {
 
   const handleWhatsApp = () => {
     // Track conversion in Google Analytics
+    console.log('Attempting to track WhatsApp conversion from Hero');
     if (window.gtag_report_conversion_whatsapp) {
+      console.log('Calling gtag_report_conversion_whatsapp from Hero');
       window.gtag_report_conversion_whatsapp();
+    } else {
+      console.warn('gtag_report_conversion_whatsapp function not found');
     }
     const message = encodeURIComponent('Hello! I\'d like to discuss a 3D interior design project.');
     window.open(`https://wa.me/${mockData.contact.whatsapp.replace(/[^0-9]/g, '')}?text=${message}`, '_blank');
