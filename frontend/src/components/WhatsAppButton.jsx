@@ -6,8 +6,12 @@ import { mockData } from '../mock';
 const WhatsAppButton = () => {
   const handleWhatsAppClick = () => {
     // Track conversion in Google Analytics
+    console.log('Attempting to track WhatsApp conversion');
     if (window.gtag_report_conversion_whatsapp) {
+      console.log('Calling gtag_report_conversion_whatsapp');
       window.gtag_report_conversion_whatsapp();
+    } else {
+      console.warn('gtag_report_conversion_whatsapp function not found');
     }
     window.open(`https://wa.me/${mockData.contact.whatsapp}`, '_blank');
   };
