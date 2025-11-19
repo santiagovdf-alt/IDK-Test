@@ -78,15 +78,6 @@ const LeadForm = () => {
         throw error;
       }
 
-      // Track conversion in Google Analytics
-      console.log('Attempting to track consultation conversion');
-      if (window.gtag_report_conversion_consultation) {
-        console.log('Calling gtag_report_conversion_consultation');
-        window.gtag_report_conversion_consultation();
-      } else {
-        console.warn('gtag_report_conversion_consultation function not found');
-      }
-
       toast.success("Request Submitted!", {
         description: "We'll contact you within 24 hours to discuss your project.",
       });
