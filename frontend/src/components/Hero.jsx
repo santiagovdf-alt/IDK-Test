@@ -5,6 +5,19 @@ import { mockData } from '../mock';
 import BeforeAfterSlider from './BeforeAfterSlider';
 
 const Hero = ({ onRequestProposal, onWhatsApp }) => {
+  const handleConsultationClick = () => {
+    // Track conversion in Google Analytics
+    console.log('Hero CTA clicked - tracking consultation conversion');
+    if (window.gtag_report_conversion_consultation) {
+      console.log('Calling gtag_report_conversion_consultation from Hero');
+      window.gtag_report_conversion_consultation();
+    } else {
+      console.warn('gtag_report_conversion_consultation function not found');
+    }
+    // Scroll to form
+    onRequestProposal();
+  };
+
   return (
     <section className="relative min-h-screen flex items-center overflow-hidden">
       {/* Background with subtle gradient */}
@@ -39,18 +52,7 @@ const Hero = ({ onRequestProposal, onWhatsApp }) => {
             {/* CTA Buttons */}
             <div className="flex flex-col sm:flex-row items-start gap-4 pt-4">
               <Button
-                onClick={() => {
-                  // Track conversion in Google Analytics
-                  console.log('Hero CTA clicked - tracking consultation conversion');
-                  if (window.gtag_report_conversion_consultation) {
-                    console.log('Calling gtag_report_conversion_consultation from Hero');
-                    window.gtag_report_conversion_consultation();
-                  } else {
-                    console.warn('gtag_report_conversion_consultation function not found');
-                  }
-                  // Scroll to form
-                  onRequestProposal();
-                }}
+                onClick={handleConsultationClick}
                 size="lg"
                 className="bg-white text-[#1F2B35] hover:bg-[#D3D6D9] font-semibold px-8 py-6 text-lg rounded-lg transition-all duration-300 hover:scale-105 hover:shadow-2xl group"
               >
